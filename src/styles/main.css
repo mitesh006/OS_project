@@ -1,0 +1,407 @@
+/* ===================================================
+   OS SCHEDULER BOSS RUSH — main.css
+   Core Design System: Variables, Reset, Layout
+   =================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+/* ── CSS Custom Properties ─────────────────────── */
+:root {
+  /* Color Palette */
+  --bg-darkest:   #030610;
+  --bg-dark:      #060d1f;
+  --bg-medium:    #0a1535;
+  --bg-panel:     rgba(10, 21, 53, 0.85);
+  --bg-glass:     rgba(14, 28, 68, 0.6);
+  --bg-glass2:    rgba(6, 16, 40, 0.75);
+
+  --neon-cyan:    #00f5ff;
+  --neon-blue:    #0066ff;
+  --neon-purple:  #a855f7;
+  --neon-green:   #00ff88;
+  --neon-red:     #ff2d5a;
+  --neon-yellow:  #ffd700;
+  --neon-orange:  #ff8c00;
+
+  --player-color: #00f5ff;
+  --boss-color:   #ff2d5a;
+  --cpu-color:    #00ff88;
+  --queue-color:  #a855f7;
+
+  --text-primary:   #e8f4ff;
+  --text-secondary: #7fb3d3;
+  --text-muted:     #3d6080;
+
+  --border-dim:   rgba(0, 245, 255, 0.15);
+  --border-glow:  rgba(0, 245, 255, 0.5);
+
+  /* Typography */
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono:    'Share Tech Mono', monospace;
+  --font-body:    'Rajdhani', sans-serif;
+
+  /* Spacing */
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 40px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* HP Colors */
+  --hp-high:   #00ff88;
+  --hp-med:    #ffd700;
+  --hp-low:    #ff2d5a;
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-med:    300ms ease;
+  --transition-slow:   500ms ease;
+}
+
+/* ── Reset ─────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-darkest);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+#particle-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Screen System ──────────────────────────────── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  z-index: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.screen.active {
+  display: flex;
+}
+
+/* ── Common Components ──────────────────────────── */
+.section-title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  margin-bottom: var(--gap-md);
+  padding-bottom: var(--gap-xs);
+  border-bottom: 1px solid var(--border-dim);
+}
+
+/* ── HP Bar ─────────────────────────────────────── */
+.hud-hp-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid var(--border-dim);
+}
+.hp-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.4s ease, background-color 0.4s ease;
+}
+.player-hp-fill {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+  box-shadow: 0 0 8px var(--neon-cyan);
+}
+.boss-hp-fill {
+  background: linear-gradient(90deg, var(--neon-red), #ff6b35);
+  box-shadow: 0 0 8px var(--neon-red);
+}
+.hp-fill.hp-low {
+  background: linear-gradient(90deg, #ff2d5a, #ff0000);
+  animation: hp-pulse 0.8s ease infinite;
+}
+
+/* ── Screen Header ──────────────────────────────── */
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-md) var(--gap-lg);
+  background: var(--bg-glass);
+  border-bottom: 1px solid var(--border-dim);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+.screen-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  color: var(--neon-cyan);
+}
+
+/* ── Back Button ────────────────────────────────── */
+.back-btn {
+  background: none;
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.back-btn:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  background: rgba(0,245,255,0.05);
+}
+
+/* ── Buttons ────────────────────────────────────── */
+.menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-dim);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-med);
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+.menu-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,245,255,0.05), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.menu-btn:hover::before { opacity: 1; }
+.menu-btn:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 20px rgba(0,245,255,0.2), inset 0 0 20px rgba(0,245,255,0.05);
+  transform: translateY(-2px);
+}
+.menu-btn:active { transform: translateY(0); }
+
+.menu-btn.primary {
+  background: linear-gradient(135deg, rgba(0,102,255,0.3), rgba(0,245,255,0.15));
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0,245,255,0.15);
+}
+.menu-btn.primary:hover {
+  box-shadow: 0 0 30px rgba(0,245,255,0.4), inset 0 0 30px rgba(0,245,255,0.1);
+}
+.menu-btn.secondary {
+  border-color: var(--border-dim);
+  color: var(--text-secondary);
+}
+.menu-btn.danger {
+  border-color: var(--neon-red);
+  color: var(--neon-red);
+  background: rgba(255,45,90,0.1);
+}
+.menu-btn.danger:hover {
+  border-color: var(--neon-red);
+  box-shadow: 0 0 20px rgba(255,45,90,0.3);
+}
+.menu-btn.small {
+  padding: 8px 16px;
+  font-size: 0.7rem;
+  width: auto;
+}
+
+.btn-icon { font-size: 1.1em; }
+
+.icon-btn {
+  background: none;
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.icon-btn:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  background: rgba(0,245,255,0.1);
+}
+
+/* ── Modal System ───────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gap-lg);
+}
+.modal-box {
+  background: var(--bg-medium);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-lg);
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 0 60px rgba(0,245,255,0.15);
+}
+.modal-box.large { max-width: 760px; }
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-lg);
+  border-bottom: 1px solid var(--border-dim);
+}
+.modal-header h2 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--neon-cyan);
+  letter-spacing: 0.15em;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+.modal-close:hover { color: var(--neon-red); }
+.modal-body {
+  padding: var(--gap-lg);
+}
+.modal-footer {
+  padding: var(--gap-md) var(--gap-lg);
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.htp-section {
+  margin-bottom: var(--gap-lg);
+}
+.htp-section h3 {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--neon-cyan);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--gap-sm);
+}
+.htp-section p { margin-bottom: var(--gap-sm); line-height: 1.6; color: var(--text-secondary); }
+.htp-section ul { padding-left: var(--gap-lg); }
+.htp-section li { margin-bottom: 6px; line-height: 1.5; color: var(--text-secondary); }
+.htp-section strong { color: var(--text-primary); }
+
+/* ── Settings ───────────────────────────────────── */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-md) 0;
+  border-bottom: 1px solid var(--border-dim);
+}
+.setting-row.danger label { color: var(--neon-red); }
+.setting-row label { font-family: var(--font-body); font-size: 0.95rem; }
+
+.toggle-btn {
+  background: rgba(0,245,255,0.1);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.toggle-btn.off {
+  background: rgba(100,100,100,0.1);
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+}
+
+/* ── Scroll Styling ─────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-darkest); }
+::-webkit-scrollbar-thumb { background: var(--border-dim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+
+/* ── Player Info Compact ────────────────────────── */
+.player-info-compact {
+  display: flex;
+  gap: var(--gap-md);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.player-info-compact span { color: var(--neon-cyan); }
+
+/* ── Damage Numbers ─────────────────────────────── */
+.damage-number {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 100;
+}
+.damage-number.hit { color: var(--neon-green); }
+.damage-number.hurt { color: var(--neon-red); }

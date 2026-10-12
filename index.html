@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="OS Scheduler Boss Rush — An educational boss-battle game about CPU scheduling algorithms. Battle the Schedulers. Master the CPU." />
+  <title>OS Scheduler Boss Rush — Battle the Schedulers. Master the CPU.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/styles/main.css" />
+  <link rel="stylesheet" href="src/styles/menu.css" />
+  <link rel="stylesheet" href="src/styles/battle.css" />
+  <link rel="stylesheet" href="src/styles/animations.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Particle Canvas Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- MAIN MENU SCREEN -->
+    <div id="screen-menu" class="screen active">
+      <div class="menu-bg-grid"></div>
+      <div class="menu-content">
+        <div class="menu-logo">
+          <div class="logo-prefix">⚡ CPU BOSS RUSH</div>
+          <h1 class="logo-title">OS SCHEDULER<br/><span class="logo-highlight">BOSS RUSH</span></h1>
+          <p class="logo-subtitle">Battle the Schedulers. Master the CPU.</p>
+          <div class="logo-scan-line"></div>
+        </div>
+        <div class="menu-buttons">
+          <button class="menu-btn primary" id="btn-start-game" aria-label="Start Game">
+            <span class="btn-icon">▶</span> START GAME
+          </button>
+          <button class="menu-btn" id="btn-how-to-play" aria-label="How to Play">
+            <span class="btn-icon">?</span> HOW TO PLAY
+          </button>
+          <button class="menu-btn" id="btn-learn" aria-label="Learn Schedulers">
+            <span class="btn-icon">📚</span> LEARN SCHEDULERS
+          </button>
+          <button class="menu-btn" id="btn-leaderboard" aria-label="Leaderboard">
+            <span class="btn-icon">🏆</span> LEADERBOARD
+          </button>
+          <button class="menu-btn" id="btn-demo" aria-label="Demo Mode">
+            <span class="btn-icon">🎬</span> DEMO MODE
+          </button>
+          <button class="menu-btn secondary" id="btn-settings" aria-label="Settings">
+            <span class="btn-icon">⚙</span> SETTINGS
+          </button>
+        </div>
+        <div class="menu-version">v1.0.0 — OS Concepts Educational Game</div>
+      </div>
+    </div>
+
+    <!-- LEVEL SELECT SCREEN -->
+    <div id="screen-level-select" class="screen">
+      <div class="screen-header">
+        <button class="back-btn" id="btn-back-menu" aria-label="Back to Menu">← BACK</button>
+        <h2>SELECT BATTLE</h2>
+        <div class="player-info-compact">
+          <span id="ls-player-hp">HP: 100</span>
+          <span id="ls-player-score">SCORE: 0</span>
+        </div>
+      </div>
+      <div class="level-select-grid" id="level-grid">
+        <!-- Boss cards injected by JS -->
+      </div>
+    </div>
+
+    <!-- BOSS INTRO SCREEN -->
+    <div id="screen-boss-intro" class="screen">
+      <div class="boss-intro-content" id="boss-intro-content">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <!-- BATTLE SCREEN -->
+    <div id="screen-battle" class="screen">
+      <!-- Top HUD -->
+      <div class="battle-hud">
+        <div class="hud-player">
+          <div class="hud-name" id="hud-player-name">PLAYER PC</div>
+          <div class="hud-hp-bar">
+            <div class="hp-fill player-hp-fill" id="player-hp-fill"></div>
+          </div>
+          <div class="hud-hp-text" id="hud-player-hp">100 / 100</div>
+        </div>
+        <div class="hud-center">
+          <div class="hud-level-name" id="hud-level-name">LEVEL 1</div>
+          <div class="hud-timer-wrap">
+            <div class="hud-timer" id="hud-timer">20</div>
+            <div class="timer-ring" id="timer-ring"></div>
+          </div>
+          <div class="hud-controls">
+            <button class="icon-btn" id="btn-pause" aria-label="Pause">⏸</button>
+            <button class="icon-btn" id="btn-mute" aria-label="Mute Sound">🔊</button>
+            <button class="icon-btn" id="btn-learn-battle" aria-label="Learn">📖</button>
+          </div>
+        </div>
+        <div class="hud-boss">
+          <div class="hud-name" id="hud-boss-name">FCFS KING</div>
+          <div class="hud-hp-bar">
+            <div class="hp-fill boss-hp-fill" id="boss-hp-fill"></div>
+          </div>
+          <div class="hud-hp-text" id="hud-boss-hp">100 / 100</div>
+        </div>
+      </div>
+
+      <!-- Battle Arena -->
+      <div class="battle-arena">
+        <!-- Player Side -->
+        <div class="battle-character player-character" id="player-character">
+          <div class="character-sprite player-sprite" id="player-sprite">
+            <div class="pc-monitor">
+              <div class="pc-screen">
+                <div class="pc-screen-content">OK</div>
+              </div>
+              <div class="pc-stand"></div>
+              <div class="pc-base"></div>
+            </div>
+          </div>
+          <div class="character-label">PLAYER PC</div>
+          <div class="damage-number player-damage" id="player-damage-num"></div>
+        </div>
+
+        <!-- CPU Arena Center -->
+        <div class="cpu-arena">
+          <div class="cpu-box" id="cpu-box">
+            <div class="cpu-label">⚡ CPU</div>
+            <div class="cpu-executing" id="cpu-executing">IDLE</div>
+            <div class="cpu-progress-bar">
+              <div class="cpu-progress-fill" id="cpu-progress-fill"></div>
+            </div>
+            <div class="cpu-remaining" id="cpu-remaining">—</div>
+            <div class="context-switch-flash" id="context-switch-flash">CONTEXT SWITCH</div>
+          </div>
+          <div class="preempt-badge" id="preempt-badge">PREEMPT!</div>
+          <div class="algo-tag" id="algo-tag">FCFS</div>
+        </div>
+
+        <!-- Boss Side -->
+        <div class="battle-character boss-character" id="boss-character">
+          <div class="character-sprite boss-sprite" id="boss-sprite">
+            <!-- Boss art injected by JS -->
+          </div>
+          <div class="character-label" id="boss-char-label">FCFS KING</div>
+          <div class="damage-number boss-damage" id="boss-damage-num"></div>
+        </div>
+      </div>
+
+      <!-- Ready Queue -->
+      <div class="ready-queue-section">
+        <div class="rq-header">
+          <span class="rq-title">READY QUEUE</span>
+          <span class="rq-time">TIME: <span id="current-time">0</span></span>
+        </div>
+        <div class="ready-queue" id="ready-queue">
+          <!-- Process cards injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Question / Challenge Area -->
+      <div class="challenge-area" id="challenge-area">
+        <div class="challenge-text" id="challenge-text">
+          Which process should the scheduler execute next?
+        </div>
+        <div class="challenge-hint" id="challenge-hint"></div>
+        <div class="challenge-options" id="challenge-options">
+          <!-- Answer buttons injected dynamically -->
+        </div>
+        <div class="challenge-feedback" id="challenge-feedback"></div>
+      </div>
+
+      <!-- Score HUD Bottom -->
+      <div class="score-hud">
+        <div class="score-item">
+          <span class="score-label">SCORE</span>
+          <span class="score-val" id="battle-score">0</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">COMBO</span>
+          <span class="score-val combo-val" id="battle-combo">x1</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">ACCURACY</span>
+          <span class="score-val" id="battle-accuracy">--%</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">SWITCHES</span>
+          <span class="score-val" id="battle-switches">0</span>
+        </div>
+        <!-- Abilities -->
+        <div class="abilities-row" id="abilities-row">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- GANTT + RESULTS SCREEN -->
+    <div id="screen-results" class="screen">
+      <div class="results-content">
+        <div class="results-header">
+          <div class="results-rank" id="results-rank">S</div>
+          <div class="results-title" id="results-title">BOSS DEFEATED!</div>
+          <div class="results-boss" id="results-boss-name">FCFS KING</div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="metrics-section">
+          <h3 class="section-title">PERFORMANCE METRICS</h3>
+          <div class="metrics-grid" id="metrics-grid">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Gantt Chart -->
+        <div class="gantt-section">
+          <h3 class="section-title">GANTT CHART</h3>
+          <div class="gantt-scroll">
+            <div class="gantt-chart" id="gantt-chart">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Process Table -->
+        <div class="process-table-section">
+          <h3 class="section-title">PROCESS DETAILS</h3>
+          <div class="table-scroll">
+            <table class="process-table" id="process-table">
+              <thead>
+                <tr>
+                  <th>PID</th>
+                  <th>Arrival</th>
+                  <th>Burst</th>
+                  <th>Start</th>
+                  <th>Finish</th>
+                  <th>Waiting</th>
+                  <th>Turnaround</th>
+                  <th>Response</th>
+                </tr>
+              </thead>
+              <tbody id="process-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Score Summary -->
+        <div class="score-summary">
+          <div class="score-row">
+            <span>Base Score:</span><span id="res-base-score">0</span>
+          </div>
+          <div class="score-row">
+            <span>Speed Bonus:</span><span id="res-speed-bonus">0</span>
+          </div>
+          <div class="score-row">
+            <span>Accuracy Bonus:</span><span id="res-accuracy-bonus">0</span>
+          </div>
+          <div class="score-row total">
+            <span>TOTAL SCORE:</span><span id="res-total-score">0</span>
+          </div>
+        </div>
+
+        <!-- Reward / Unlock -->
+        <div class="reward-section" id="reward-section" style="display:none">
+          <div class="reward-title">🎁 REWARD UNLOCKED</div>
+          <div class="reward-text" id="reward-text"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="results-buttons">
+          <button class="menu-btn primary" id="btn-next-level" aria-label="Next Level">NEXT BOSS →</button>
+          <button class="menu-btn" id="btn-retry" aria-label="Retry Level">↺ RETRY</button>
+          <button class="menu-btn secondary" id="btn-to-menu-results" aria-label="Main Menu">⌂ MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div id="screen-gameover" class="screen">
+      <div class="gameover-content">
+        <div class="gameover-glitch" data-text="GAME OVER">GAME OVER</div>
+        <p class="gameover-sub">Your PC has been terminated.</p>
+        <div class="gameover-score">Final Score: <span id="go-score">0</span></div>
+        <div class="results-buttons">
+          <button class="menu-btn primary" id="btn-go-retry" aria-label="Retry">↺ RETRY LEVEL</button>
+          <button class="menu-btn secondary" id="btn-go-menu" aria-label="Main Menu">⌂ MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div id="modal-how-to-play" class="modal-overlay" style="display:none">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2>HOW TO PLAY</h2>
+          <button class="modal-close" id="btn-close-htp" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="htp-section">
+            <h3>🎮 Core Gameplay</h3>
+            <p>Each level pits you against a <strong>CPU Scheduling Algorithm Boss</strong>. The boss uses a specific scheduling algorithm to decide which process gets the CPU.</p>
+            <p>Your job: <strong>Predict the correct scheduling decision</strong> before the timer runs out!</p>
+          </div>
+          <div class="htp-section">
+            <h3>⚔️ Combat</h3>
+            <ul>
+              <li><strong>Correct Answer</strong> → Boss loses HP + Score + Combo</li>
+              <li><strong>Wrong Answer</strong> → You lose HP + Combo resets</li>
+              <li><strong>Fast Answer</strong> → Bonus damage!</li>
+              <li><strong>Timer Expires</strong> → Boss attacks!</li>
+            </ul>
+          </div>
+          <div class="htp-section">
+            <h3>📊 Scheduling Algorithms</h3>
+            <ul>
+              <li><strong>FCFS</strong> — First arrival gets CPU first</li>
+              <li><strong>SJF</strong> — Shortest burst time goes first</li>
+              <li><strong>Priority</strong> — Lowest priority number goes first</li>
+              <li><strong>Round Robin</strong> — Each process gets a time quantum</li>
+              <li><strong>SRTF</strong> — Preemptive: shortest remaining time wins</li>
+            </ul>
+          </div>
+          <div class="htp-section">
+            <h3>🏆 Scoring &amp; Ranks</h3>
+            <ul>
+              <li>S Rank: 95%+ accuracy, low damage taken, no hints</li>
+              <li>A Rank: 80%+ accuracy</li>
+              <li>B Rank: 65%+ accuracy</li>
+              <li>C Rank: 50%+ accuracy</li>
+              <li>D Rank: Below 50%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEARN MODAL -->
+    <div id="modal-learn" class="modal-overlay" style="display:none">
+      <div class="modal-box large">
+        <div class="modal-header">
+          <h2>LEARN SCHEDULERS</h2>
+          <button class="modal-close" id="btn-close-learn" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body" id="learn-modal-body">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- BATTLE LEARN MODAL -->
+    <div id="modal-battle-learn" class="modal-overlay" style="display:none">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 id="battle-learn-title">SCHEDULING RULES</h2>
+          <button class="modal-close" id="btn-close-battle-learn" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body" id="battle-learn-body">
+          <!-- Injected by JS -->
+        </div>
+        <div class="modal-footer">
+          <button class="menu-btn secondary small" id="btn-use-hint" aria-label="Use Hint">💡 USE HINT (<span id="hint-count">3</span> left)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD MODAL -->
+    <div id="modal-leaderboard" class="modal-overlay" style="display:none">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2>LEADERBOARD</h2>
+          <button class="modal-close" id="btn-close-leaderboard" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="leaderboard-summary" style="margin-bottom:12px; font-weight:700; color:var(--neon-cyan);">
+            HIGH SCORE: <span id="leaderboard-high-score">0</span>
+          </div>
+          <ol id="leaderboard-list" style="padding-left:22px; margin:0; display:grid; gap:10px; color:var(--text); font-family:var(--font-mono);"></ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="modal-settings" class="modal-overlay" style="display:none">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2>SETTINGS</h2>
+          <button class="modal-close" id="btn-close-settings" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-row">
+            <label>Sound Effects</label>
+            <button class="toggle-btn" id="toggle-sound" aria-label="Toggle Sound">ON</button>
+          </div>
+          <div class="setting-row">
+            <label>Show Hints by Default</label>
+            <button class="toggle-btn" id="toggle-hints" aria-label="Toggle Hints">ON</button>
+          </div>
+          <div class="setting-row danger">
+            <label>Reset All Progress</label>
+            <button class="menu-btn danger small" id="btn-reset-progress" aria-label="Reset Progress">RESET</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAUSE MODAL -->
+    <div id="modal-pause" class="modal-overlay" style="display:none">
+      <div class="modal-box">
+        <div class="modal-header"><h2>⏸ PAUSED</h2></div>
+        <div class="modal-body" style="text-align:center;">
+          <button class="menu-btn primary" id="btn-resume" aria-label="Resume">▶ RESUME</button>
+          <button class="menu-btn" id="btn-pause-menu" aria-label="Main Menu">⌂ MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end #app -->
+
+  <!-- Scripts (order matters) -->
+  <script src="src/algorithms/fcfs.js"></script>
+  <script src="src/algorithms/sjf.js"></script>
+  <script src="src/algorithms/priority.js"></script>
+  <script src="src/algorithms/roundRobin.js"></script>
+  <script src="src/algorithms/srtf.js"></script>
+  <script src="src/process/processGenerator.js"></script>
+  <script src="src/process/processManager.js"></script>
+  <script src="src/data/bosses.js"></script>
+  <script src="src/data/levels.js"></script>
+  <script src="src/game/scoring.js"></script>
+  <script src="src/game/playerSystem.js"></script>
+  <script src="src/game/bossSystem.js"></script>
+  <script src="src/game/battleSystem.js"></script>
+  <script src="src/game/progression.js"></script>
+  <script src="src/game/gameEngine.js"></script>
+  <script src="src/visualization/ganttChart.js"></script>
+  <script src="src/visualization/metrics.js"></script>
+  <script src="src/visualization/readyQueue.js"></script>
+  <script src="src/ui/particles.js"></script>
+  <script src="src/ui/audio.js"></script>
+  <script src="src/ui/menu.js"></script>
+  <script src="src/ui/battleScreen.js"></script>
+  <script src="src/ui/bossIntro.js"></script>
+  <script src="src/ui/results.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>
